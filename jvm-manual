@@ -1,0 +1,66 @@
+T15_FullGC_Problem01
+
+OOM problem locating method:
+1. Use jmap to detect which classes are consuming the memory.
+2. Use jmap -dump to store result to a hprof file.
+3. Use tools like jvisualvm or jprofiler to visualise the memory usage.
+
+Commands:
+
+1. javac T15_FullGC_Problem01
+
+2. java -Xms200M -Xmx200M -Xlog:gc T15_FullGC_Problem01
+Set the maximum and minimum java heap to a same value to prevent repeated changes in memory capacity
+as it consumes time to compute the reasonable new memory capacity.
+
+java -Xms200M -Xmx200M -XX:UseParallelGC -XX:HeapDumpOnOutOfMemoryError
+Since 1, the remote linux server cannot open ports to the outside,
+and 2, the running service cannot stop the world to dump the heap usage,
+therefore, configure -XX:HeapDumpOnOutOfMemoryError to dump the heap usage when JVM stops working due to OOM.
+
+3. jps
+List all java processes (java process pid, java process name).
+
+4. jinfo $pid
+For example, jinfo 2299
+Show the information of process including os, charset, vm flags, and etc.
+
+5. jstat -gc $pid
+S0C: size of first Survivor Space
+S1C: size of second Survivor Space
+S0U: size of first Survivor Space at using
+S1U: size of second Survivor Space at using
+EC: size of Eden Space
+EU: size of Eden Space at using
+OC: size of Old Gen
+OU: size of Old Gen at using
+MC: size of Method Space
+MU: size of Method Space at using
+CCSC: size of Compressed Class Space
+CCSU: size of Compressed Class Space at using
+YGC: gc times of Young Gen
+YGCT: gc time of Young Gen
+FGC: gc times of Old Gen
+FGCT: gc time of Old Gen
+GCT: total gc time
+
+6. jstat -gc $pid $milliseconds
+For example, jstat -gc $pid 500
+Print the statistics info every 500 milliseconds.
+
+7. top
+Linux command, monitor the processes order by desc in resources consuming.
+zabbix + prometheas to locate the problem
+
+8. jstack $pid
+List all threads with names, states, and etc.
+
+jstack -l $pid > jstack.txt
+Store jstack info to jstack.txt in order to analyse offline.
+
+9. jmap -histo $pid
+List classes and corresponding number of instances and bytes.
+
+jmap -dump:format=b,file=jmap.hprof $pid
+Store jmap info to jmap.hprof in order to analyse offline.
+
